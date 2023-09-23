@@ -1,0 +1,3 @@
+[submodule "RPG-Service"]
+	path = RPG-Service
+	url = https://github.com/HTW-KBE-2023/RPG-Service.git
