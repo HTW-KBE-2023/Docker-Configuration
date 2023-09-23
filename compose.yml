@@ -1,0 +1,54 @@
+services:
+  rpg_database:
+    platform: linux/x86_64
+    image: mysql
+    container_name: rpg_database
+    ports:
+      - "10003:3306"
+    volumes:
+      - ./:/app/
+    environment:
+      MYSQL_DATABASE: RpgDB
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_ROOT_PASSWORD: user
+    networks:
+      - rpg_net
+
+  rpg_api:
+    container_name: rpg_api
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+    ports:
+      - "10001:80"
+      - "10002:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      rpg_database:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    links:
+      - rpg_database
+      - rabbitmq
+    networks:
+      - rpg_net
+      - message_net
+
+  rabbitmq:
+    image: masstransit/rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - message_net
+
+networks:
+  rpg_net:
+    name: rpg_net
+  message_net:
+    name: message_net
