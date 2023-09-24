@@ -18,8 +18,8 @@ services:
   rpg_api:
     container_name: rpg_api
     build:
-      context: .
-      dockerfile: API/Dockerfile
+      context: RPG-Service
+      dockerfile: RPG-API/Dockerfile
     ports:
       - "10001:80"
       - "10002:443"
@@ -38,6 +38,64 @@ services:
       - rpg_net
       - message_net
 
+  survey_database:
+    platform: linux/x86_64
+    image: mysql
+    container_name: survey_database
+    ports:
+      - "10006:3306"
+    environment:
+      MYSQL_DATABASE: SurveyDB
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_ROOT_PASSWORD: user
+    networks:
+      - survey_net
+
+  survey_api:
+    container_name: survey_api
+    build:
+      context: Survey-Service
+      dockerfile: Survey-API/Dockerfile
+    ports:
+      - "10004:80"
+      - "10005:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      survey_database:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    links:
+      - survey_database
+      - rabbitmq
+    networks:
+      - survey_net
+      - message_net
+
+  gateway:
+    container_name: gateway
+    build:
+      context: Gateway
+      dockerfile: Gateway/Dockerfile
+    ports:
+      - "10007:80"
+      - "10008:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      rpg_api:
+        condition: service_started
+    links:
+      - rpg_api
+      - survey_api
+    networks:
+      - rpg_net
+      - survey_net
+
   rabbitmq:
     image: masstransit/rabbitmq
     hostname: rabbitmq
@@ -50,5 +108,7 @@ services:
 networks:
   rpg_net:
     name: rpg_net
+  survey_net:
+    name: survey_net
   message_net:
     name: message_net
