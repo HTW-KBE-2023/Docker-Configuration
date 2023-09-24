@@ -11,7 +11,13 @@ services:
       MYSQL_DATABASE: RpgDB
       MYSQL_USER: user
       MYSQL_PASSWORD: user
-      MYSQL_ROOT_PASSWORD: user
+      MYSQL_ROOT_PASSWORD: rootUser
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-prootUser"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s 
     networks:
       - rpg_net
 
@@ -28,9 +34,9 @@ services:
       - ASPNETCORE_URLS=http://+:80
     depends_on:
       rpg_database:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     links:
       - rpg_database
       - rabbitmq
@@ -48,7 +54,13 @@ services:
       MYSQL_DATABASE: SurveyDB
       MYSQL_USER: user
       MYSQL_PASSWORD: user
-      MYSQL_ROOT_PASSWORD: user
+      MYSQL_ROOT_PASSWORD: rootUser
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-prootUser"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s 
     networks:
       - survey_net
 
@@ -65,9 +77,9 @@ services:
       - ASPNETCORE_URLS=http://+:80
     depends_on:
       survey_database:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     links:
       - survey_database
       - rabbitmq
@@ -102,6 +114,12 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s     
     networks:
       - message_net
 
