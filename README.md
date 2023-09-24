@@ -8,7 +8,7 @@ It contains at the moment:
 - API-GateWay
 
 The above listed Modules are imported as a git-submodule.
-To update all Submodules us the command:
+To update all Submodules use the command:
 
 ```console
 git submodule update --recursive --remote
