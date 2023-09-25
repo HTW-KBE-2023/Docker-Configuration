@@ -6,7 +6,7 @@ services:
     ports:
       - "10003:3306"
     volumes:
-      - ./:/app/
+      - rpg_data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: RpgDB
       MYSQL_USER: user
@@ -14,10 +14,10 @@ services:
       MYSQL_ROOT_PASSWORD: rootUser
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-prootUser"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 5s 
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s 
     networks:
       - rpg_net
 
@@ -50,6 +50,8 @@ services:
     container_name: survey_database
     ports:
       - "10006:3306"
+    volumes:
+      - survey_data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: SurveyDB
       MYSQL_USER: user
@@ -57,10 +59,10 @@ services:
       MYSQL_ROOT_PASSWORD: rootUser
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-prootUser"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 5s 
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s 
     networks:
       - survey_net
 
@@ -74,7 +76,7 @@ services:
       - "10005:443"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_URLS=http://+:80    
     depends_on:
       survey_database:
         condition: service_healthy
@@ -120,12 +122,14 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:15672"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 5s     
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s     
     networks:
       - message_net
 
@@ -134,12 +138,14 @@ services:
     hostname: redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "-p", "6379", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 5s     
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s     
     networks:
       - chache_net
 
@@ -152,3 +158,9 @@ networks:
     name: message_net
   chache_net:
     name: chache_net
+
+volumes:
+  rpg_data:
+  survey_data:
+  rabbit_data:
+  redis_data:
