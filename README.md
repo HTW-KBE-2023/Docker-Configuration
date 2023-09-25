@@ -8,10 +8,16 @@ It contains at the moment:
 - API-GateWay
 
 The above listed Modules are imported as a git-submodule.
-To update all Submodules use the command:
+To update all allready initialized Submodules use the command:
 
 ```console
 git submodule update --recursive --remote
+```
+
+If some are not updated maby you need to initialize them first:
+
+```console
+git submodule update --init --recursive --remote
 ```
 
 Aditional there is a compose-file to start all Services with Docker.
