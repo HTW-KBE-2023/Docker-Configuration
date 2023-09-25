@@ -100,9 +100,9 @@ services:
       - ASPNETCORE_URLS=http://+:80
     depends_on:
       rpg_api:
-        condition: service_started
+        condition: service_healthy
       survey_api:
-        condition: service_started
+        condition: service_healthy
       redis:
         condition: service_healthy
     links:
