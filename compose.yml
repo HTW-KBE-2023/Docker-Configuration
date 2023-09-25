@@ -101,12 +101,18 @@ services:
     depends_on:
       rpg_api:
         condition: service_started
+      survey_api:
+        condition: service_started
+      redis:
+        condition: service_healthy
     links:
       - rpg_api
       - survey_api
+      - redis
     networks:
       - rpg_net
       - survey_net
+      - chache_net
 
   rabbitmq:
     image: masstransit/rabbitmq
@@ -123,6 +129,20 @@ services:
     networks:
       - message_net
 
+  redis:
+    image: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s     
+    networks:
+      - chache_net
+
 networks:
   rpg_net:
     name: rpg_net
@@ -130,3 +150,5 @@ networks:
     name: survey_net
   message_net:
     name: message_net
+  chache_net:
+    name: chache_net
