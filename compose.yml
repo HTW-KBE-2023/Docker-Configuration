@@ -89,6 +89,51 @@ services:
       - survey_net
       - message_net
 
+  discord_database:
+    platform: linux/x86_64
+    image: mysql
+    container_name: discord_database
+    ports:
+      - "10009:3306"
+    volumes:
+      - discord_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: DiscordDB
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_ROOT_PASSWORD: rootUser
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-prootUser"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s 
+    networks:
+      - discord_net
+
+  discord_api:
+    container_name: discord_api
+    build:
+      context: Discord-Service
+      dockerfile: Discord-API/Dockerfile
+    ports:
+      - "10010:80"
+      - "10011:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      discord_database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - discord_database
+      - rabbitmq
+    networks:
+      - discord_net
+      - message_net
+
   gateway:
     container_name: gateway
     build:
@@ -154,6 +199,8 @@ networks:
     name: rpg_net
   survey_net:
     name: survey_net
+  discord_net:
+    name: discord_net
   message_net:
     name: message_net
   chache_net:
@@ -162,5 +209,6 @@ networks:
 volumes:
   rpg_data:
   survey_data:
+  discord_data:
   rabbit_data:
   redis_data:
